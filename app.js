@@ -2,6 +2,13 @@ const main = document.querySelector('main');
 const sourceSelector = document.querySelector('#sourceSelector');
 const defaultSource = 'the-washington-post';
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () =>
+    navigator.serviceWorker.register('sw.js')
+      .then(registration => console.log('Service Worker registered'))
+      .catch(err => 'SW registration failed'));
+}
+
 window.addEventListener('load', e =>{
   updateNews();
   console.log('app file');
@@ -12,16 +19,6 @@ window.addEventListener('load', e =>{
     updateNews(e.target.value);
   })
 
-if (navigator.serviceWorker.controller) {
-  console.log('[PWA Builder] active service worker found, no need to register')
-} else {
-  //Register the ServiceWorker
-  navigator.serviceWorker.register('sw.js', {
-    scope: './'
-  }).then(function(reg) {
-    console.log('Service worker has been registered for scope:'+ reg.scope);
-  });
-}
 });
 
 async function updateSources(){
@@ -38,7 +35,7 @@ async function updateNews(source = defaultSource){
     const res= await fetch(`https://newsapi.org/v2/top-headlines?sources=${source}&apiKey=a955ea5818964bf6b533628ccad8572a`);
     const json = await res.json();
     main.innerHTML = json.articles.map(createArticle).join('\n');
-  
+
 };
 
 function createArticle(article){
